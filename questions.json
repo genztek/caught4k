@@ -1,0 +1,85 @@
+{
+  "weekly_bank": [
+    {"label":"swiggy / zomato orders this week","options":[
+      {"text":"0–1. cooked like an adult","item":"Home cooking (verified)","charge":0},
+      {"text":"2–3. balance, allegedly","item":"Swiggy \"balance\" fee","charge":380},
+      {"text":"the delivery guy waves at my neighbours now","item":"Swiggy loyalty programme (involuntary)","charge":910}]},
+    {"label":"\"i'll sleep early tonight\" — this week's record","options":[
+      {"text":"said it, actually did it","item":"Sleep schedule (intact)","charge":0},
+      {"text":"said it 7 times. delivered 0","item":"\"Sleeping early\" — 7 promises, 0 delivered","charge":490},
+      {"text":"didn't even pretend. 3am is a lifestyle","item":"3am lifestyle maintenance","charge":640}]},
+    {"label":"screen time report said:","options":[
+      {"text":"under 4 hrs. suspicious but ok","item":"Screen time (within limits)","charge":60},
+      {"text":"7 hrs \"but it's for work\" (it's not)","item":"Screen time labelled \"work\" (audit: rejected)","charge":520},
+      {"text":"my phone suggested i seek help","item":"Phone wellness intervention fee","charge":780}]},
+    {"label":"workout situation:","options":[
+      {"text":"actually went. multiple times. who am i","item":"Gym attendance (confirmed, shocking)","charge":0},
+      {"text":"membership active. attendance: declined to comment","item":"Gym membership — donation to gym owner","charge":450},
+      {"text":"my walk to the fridge counts","item":"Fridge cardio programme","charge":310}]},
+    {"label":"money that vanished with no explanation:","options":[
+      {"text":"under ₹500. budgeting royalty","item":"Misc spending (acceptable)","charge":90},
+      {"text":"₹500–2000 on... things? items?","item":"Unexplained \"things and items\"","charge":560},
+      {"text":"opened bank statement. closed it immediately.","item":"Financial denial processing","charge":830}]},
+    {"label":"people you said you'd \"call back\":","options":[
+      {"text":"called everyone. saint behaviour","item":"Callback promises honoured","charge":0},
+      {"text":"texted \"hey sorry just saw this\" (lie)","item":"\"Just saw this\" fabrication fee","charge":340},
+      {"text":"they have given up. so have i.","item":"Abandoned callback storage","charge":580}]},
+    {"label":"the assignment / work deadline situation:","options":[
+      {"text":"done early. insufferable about it","item":"Early submission smugness tax","charge":120},
+      {"text":"submitted at 11:58pm. heart rate: 180","item":"11:58pm adrenaline surcharge","charge":470},
+      {"text":"asked for extension. again.","item":"Extension request (repeat customer)","charge":620}]},
+    {"label":"clothes bought vs clothes worn:","options":[
+      {"text":"wore everything i own. rotation king/queen","item":"Wardrobe utilisation (full)","charge":0},
+      {"text":"bought 2, worn 0, tags intact","item":"Tags-still-on inventory fee","charge":540},
+      {"text":"same 3 outfits. the rest is decoration","item":"Decorative wardrobe maintenance","charge":280}]}
+  ],
+
+  "seasonal": [
+    {
+      "week": 45,
+      "name": "DIWALI DAMAGE REPORT",
+      "questions": [
+        {"label":"sweets consumed (be honest, god is watching):","options":[
+          {"text":"2-3 pieces. restraint of a monk","item":"Mithai (controlled intake)","charge":50},
+          {"text":"lost count after the second kaju katli box","item":"Kaju katli liability","charge":610},
+          {"text":"i AM the sweets box now","item":"Full mithai transformation fee","charge":940}]},
+        {"label":"diwali cleaning participation:","options":[
+          {"text":"cleaned everything. mom is proud","item":"Safai contribution (verified)","charge":0},
+          {"text":"moved things from one room to another","item":"Strategic clutter relocation","charge":380},
+          {"text":"disappeared when the broom appeared","item":"Cleaning evasion penalty","charge":660}]}
+      ]
+    }
+  ],
+
+  "drops": [
+    {
+      "name": "EXAM WEEK EMERGENCY AUDIT",
+      "badge": "🔥 LIMITED · 48 HRS",
+      "starts": "2026-06-10T00:00:00+05:30",
+      "ends": "2026-06-13T23:59:00+05:30",
+      "questions": [
+        {"label":"syllabus completion status:","options":[
+          {"text":"done. revised. twice. (liar)","item":"Suspicious preparedness claim","charge":200},
+          {"text":"\"i'll start after this one reel\" — 4 hrs ago","item":"One-more-reel study method","charge":640},
+          {"text":"planning to study the friend who studied","item":"Outsourced syllabus dependency","charge":820}]},
+        {"label":"sleep plan for exam eve:","options":[
+          {"text":"8 hours. brain needs rest","item":"Responsible sleep (rare)","charge":0},
+          {"text":"all-nighter with 3 coffees and a prayer","item":"Caffeine-and-prayer protocol","charge":700},
+          {"text":"will sleep 2 hrs and dream the syllabus","item":"Osmosis learning attempt","charge":560}]},
+        {"label":"the group study session became:","options":[
+          {"text":"actual studying. miracle documented","item":"Group study (functional)","charge":100},
+          {"text":"45 min study, 3 hrs gossip","item":"Gossip-to-study ratio violation","charge":480},
+          {"text":"a food order and a movie","item":"Group study catering fee","charge":590}]}
+      ]
+    }
+  ],
+
+  "verdicts": [
+    "SAME RECEIPT NEXT WEEK. WE BOTH KNOW IT.",
+    "MONDAY-YOU KEEPS WRITING CHEQUES SUNDAY-YOU CAN'T CASH.",
+    "YOUR HABITS HAVE FILED A FORMAL COMPLAINT.",
+    "AUDIT FINDS: YOU KNEW EXACTLY WHAT YOU WERE DOING.",
+    "IMPROVEMENT DETECTED: 4%. DON'T LET IT GO TO YOUR HEAD.",
+    "\"STARTING MONDAY\" HAS BEEN CARRIED FORWARD. AGAIN."
+  ]
+}

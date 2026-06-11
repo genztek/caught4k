@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAUGHT4K — admin</title>
+<link rel="stylesheet" href="shared/theme.css">
+<style>
+  .qBlock{border:1px dashed rgba(255,255,255,.25);border-radius:12px;padding:14px;margin-top:14px}
+  .qBlock h4{font-size:13px;margin-bottom:8px;color:var(--accent)}
+  .optRow{display:grid;grid-template-columns:1fr 1fr 76px;gap:6px;margin-top:6px}
+  .optRow input{margin-top:0;padding:10px;font-size:13px}
+  textarea{min-height:110px;font-family:var(--font-receipt);font-size:12.5px}
+  .small{font-size:11.5px;opacity:.6;margin-top:6px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- GATE -->
+  <div class="panel" id="gate" style="text-align:center">
+    <label style="margin-bottom:14px">admin access</label>
+    <p style="font-size:13.5px;opacity:.8;line-height:1.6;margin-bottom:16px">
+      Connect the owner wallet to open the pack builder.
+    </p>
+    <button class="btn btn-primary" id="connectBtn">Connect wallet</button>
+    <div class="small" id="gateMsg"></div>
+  </div>
+
+  <!-- PANEL -->
+  <div id="adminPanel" class="hidden">
+    <div class="panel">
+      <label>connected as</label>
+      <div style="font-size:12px;font-family:var(--font-receipt);margin:6px 0 16px;color:var(--ok)" id="who"></div>
+
+      <label>pack type</label>
+      <select id="ptype" style="margin-bottom:14px">
+        <option value="drop">🔥 Drop (trending — has start/end time)</option>
+        <option value="seasonal">📅 Seasonal (tied to a week number)</option>
+      </select>
+
+      <label>pack name (shown on the receipt)</label>
+      <input type="text" id="pname" placeholder="e.g. IPL FINAL EMERGENCY AUDIT" style="margin-bottom:14px">
+
+      <div id="dropFields">
+        <label>starts</label>
+        <input type="datetime-local" id="pstart" style="margin-bottom:10px">
+        <label>ends</label>
+        <input type="datetime-local" id="pend" style="margin-bottom:14px">
+      </div>
+      <div id="seasonFields" class="hidden">
+        <label>week number (1–52)</label>
+        <input type="text" id="pweek" placeholder="e.g. 45 for Diwali" style="margin-bottom:14px">
+      </div>
+
+      <div id="qHost"></div>
+      <button class="btn btn-ghost" id="addQ" style="margin-top:12px;font-size:14px">+ add question</button>
+      <button class="btn btn-primary" id="genBtn" style="margin-top:10px">Generate JSON →</button>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <label>output — paste into questions.json</label>
+      <textarea id="out" readonly placeholder="Generated JSON appears here"></textarea>
+      <button class="btn btn-ghost" id="copyBtn" style="margin-top:10px;font-size:14px">Copy JSON</button>
+      <div class="small">
+        How to publish: open <b>questions.json</b> in your GitHub repo → edit → paste this object into the
+        <b>"drops"</b> (or <b>"seasonal"</b>) array → commit. GitHub Pages redeploys in ~1 minute and every
+        user sees the new pack on next open. Drops auto-expire at the end time — nothing to take down.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shared/common.js"></script>
+<script>
+injectChrome();
+
+/* ---------- gate ---------- */
+document.getElementById("connectBtn").onclick=async()=>{
+  const res=await connectWallet();
+  const msg=document.getElementById("gateMsg");
+  if(res.error){msg.textContent=res.error;return;}
+  if(isAdmin(res.address)){
+    document.getElementById("gate").classList.add("hidden");
+    document.getElementById("adminPanel").classList.remove("hidden");
+    document.getElementById("who").textContent=res.address;
+    addQuestion();
+  }else{
+    msg.textContent="This wallet is not the owner. Nothing to see here. 👀";
+  }
+};
+
+/* ---------- builder ---------- */
+document.getElementById("ptype").onchange=e=>{
+  const isDrop=e.target.value==="drop";
+  document.getElementById("dropFields").classList.toggle("hidden",!isDrop);
+  document.getElementById("seasonFields").classList.toggle("hidden",isDrop);
+};
+
+let qCount=0;
+function addQuestion(){
+  qCount++;
+  const d=document.createElement("div");d.className="qBlock";
+  d.innerHTML=
+    "<h4>QUESTION "+qCount+"</h4>"+
+    '<input type="text" class="ql" placeholder="question label — e.g. match prediction confidence:">'+
+    [1,2,3].map(()=>
+      '<div class="optRow">'+
+      '<input type="text" class="ot" placeholder="option text (what user taps)">'+
+      '<input type="text" class="oi" placeholder="receipt line item">'+
+      '<input type="text" class="oc" placeholder="₹">'+
+      "</div>").join("");
+  document.getElementById("qHost").append(d);
+}
+document.getElementById("addQ").onclick=addQuestion;
+
+document.getElementById("genBtn").onclick=()=>{
+  const type=document.getElementById("ptype").value;
+  const name=document.getElementById("pname").value.trim();
+  if(!name){toast("Pack name is required.");return;}
+
+  const questions=[];
+  document.querySelectorAll(".qBlock").forEach(b=>{
+    const label=b.querySelector(".ql").value.trim();
+    if(!label)return;
+    const options=[];
+    b.querySelectorAll(".optRow").forEach(r=>{
+      const text=r.querySelector(".ot").value.trim();
+      const item=r.querySelector(".oi").value.trim();
+      const charge=parseInt(r.querySelector(".oc").value)||0;
+      if(text&&item)options.push({text,item,charge});
+    });
+    if(options.length>=2)questions.push({label,options});
+  });
+  if(!questions.length){toast("Add at least one complete question (2+ options).");return;}
+
+  let obj;
+  if(type==="drop"){
+    const s=document.getElementById("pstart").value,e=document.getElementById("pend").value;
+    if(!s||!e){toast("Drop needs start and end times.");return;}
+    obj={name,badge:"🔥 LIMITED",starts:s+":00+05:30",ends:e+":00+05:30",questions};
+  }else{
+    const w=parseInt(document.getElementById("pweek").value);
+    if(!w||w<1||w>53){toast("Seasonal needs a valid week number.");return;}
+    obj={week:w,name,questions};
+  }
+  document.getElementById("out").value=JSON.stringify(obj,null,2);
+  toast("JSON generated. Copy → paste into questions.json → commit.");
+};
+
+document.getElementById("copyBtn").onclick=async()=>{
+  const v=document.getElementById("out").value;
+  if(!v){toast("Nothing to copy yet.");return;}
+  try{await navigator.clipboard.writeText(v);toast("Copied.");}
+  catch(e){document.getElementById("out").select();document.execCommand("copy");toast("Copied.");}
+};
+</script>
+</body>
+</html>
