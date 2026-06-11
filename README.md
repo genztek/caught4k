@@ -1,0 +1,3 @@
+# caught4k
+Caught in 4K by your own receipt. Weekly habit audits, printed as roast receipts
+CAUGHT4K turns your week into an itemised receipt. Answer five questions about what you actually did — the Swiggy orders, the "I'll sleep early" lies, the gym membership donating money to the gym owner — and get an official-looking damage report with charges, a verdict, and a total you can compare with your group chat. Questions rotate weekly, seasonal packs land on festivals and exam weeks, and limited 🔥 drops appear when something's trending. Receipts save to a private on-device diary with streaks and trend roasts. Built as a fully static site — no server, no database, no tracking. Findings are final. Appeals rejected
