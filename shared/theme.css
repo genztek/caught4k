@@ -137,8 +137,50 @@ table.charges .amt{font-size:12.5px;font-weight:bold;color:var(--red);text-align
 
 /* score block */
 .scoreblock{margin-top:4px;border:2px solid var(--ink);padding:13px 14px 15px;position:relative}
-.score-num{font-family:var(--font-stencil);font-size:62px;line-height:.9;color:var(--red)}
-.score-num small{font-family:var(--font-doc);font-size:15px;color:var(--ink)}
+.score-num{font-family:var(--font-stencil);font-size:clamp(64px,19vw,86px);line-height:.9;color:var(--red)}
+.score-num small{font-family:var(--font-doc);font-size:16px;color:var(--ink)}
+
+/* most expensive crime */
+.mostwanted{border:2px solid var(--ink);padding:11px 13px;font-family:var(--font-doc)}
+.mostwanted .mw-item{font-size:13.5px;font-weight:bold;text-transform:uppercase;line-height:1.45}
+.mostwanted .mw-row{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--red);font-weight:bold;letter-spacing:.06em}
+
+/* court findings */
+.findings{
+  font-family:var(--font-doc);font-size:11px;line-height:1.75;letter-spacing:.02em;
+  border-left:3px solid var(--red);padding:2px 0 2px 11px;text-transform:uppercase;
+}
+
+/* ---------- story share card (540x960 → rendered 1080x1920) ---------- */
+.sharecard{
+  position:absolute;left:-10000px;top:0;width:540px;height:960px;
+  background:
+    repeating-linear-gradient(0deg,transparent 0 3px,rgba(23,21,15,.012) 3px 4px),
+    linear-gradient(160deg,var(--paper) 0%,var(--paper-deep) 100%);
+  color:var(--ink);display:flex;flex-direction:column;overflow:hidden;
+}
+.sc-band{
+  background:#14120D;color:var(--paper);padding:18px 22px;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+.sc-band .sc-dept{font-family:var(--font-doc);font-size:9px;color:var(--red-bright);letter-spacing:.08em;max-width:140px;line-height:1.5}
+.sc-band .sc-brand{font-family:var(--font-display);font-size:26px}
+.sc-band .sc-brand em{font-style:normal;color:var(--red-bright)}
+.sc-band .sc-case{font-family:var(--font-doc);font-size:10px;letter-spacing:.05em;text-align:right;max-width:120px}
+.sc-body{flex:1;padding:34px 30px 0;display:flex;flex-direction:column;align-items:center;text-align:center}
+.sc-label{font-family:var(--font-doc);font-size:11px;letter-spacing:.22em;color:var(--ink-soft)}
+.sc-name{font-family:var(--font-display);font-size:34px;margin-top:8px;letter-spacing:.5px}
+.sc-score{font-family:var(--font-stencil);font-size:190px;line-height:.88;color:var(--red);margin-top:6px}
+.sc-score small{font-family:var(--font-doc);font-size:30px;color:var(--ink)}
+.sc-stamp{margin-top:18px;font-size:17px;padding:10px 16px}
+.sc-crime{margin-top:30px;border:2.5px solid var(--ink);padding:16px 18px;width:100%}
+.sc-crime-item{font-family:var(--font-doc);font-size:17px;font-weight:bold;text-transform:uppercase;margin-top:8px;line-height:1.4}
+.sc-crime-amt{font-family:var(--font-doc);font-size:12.5px;color:var(--red);font-weight:bold;margin-top:7px;letter-spacing:.08em}
+.sc-verdict{font-family:var(--font-doc);font-size:13px;letter-spacing:.04em;margin-top:24px;text-transform:uppercase;line-height:1.7;max-width:88%}
+.sc-foot{padding:0 30px 30px;text-align:center}
+.sc-cta{font-family:var(--font-display);font-size:19px;letter-spacing:.5px}
+.sc-url{font-family:var(--font-doc);font-size:14px;color:var(--red);font-weight:bold;margin-top:6px;letter-spacing:.12em}
+.sc-bars{margin-top:14px;height:34px}
 .meter{height:9px;border:1.5px solid var(--ink);margin-top:10px;position:relative;
   background:linear-gradient(90deg,#7BA05B 0%,#D9B23D 45%,var(--red-bright) 100%)}
 .meter i{position:absolute;top:-6px;width:3px;height:21px;background:var(--ink)}
@@ -211,3 +253,4 @@ table.charges .amt{font-size:12.5px;font-weight:bold;color:var(--red);text-align
   display:none;z-index:60;max-width:90%;text-align:center;font-weight:600;
 }
 .hidden{display:none!important}
+
