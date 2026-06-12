@@ -14,7 +14,7 @@ const CONFIG = {
   // Wallet addresses allowed into admin.html (lowercase!).
   // NOTE: this is a convenience gate, not security — never put secrets in this site.
   adminWallets: [
-    "0x0000000000000000000000000000000000000000"  // <-- replace with YOUR wallet address
+    "0xcBbCA61bD878b21c280236be3668bA559B8DA9EF"  // <-- replace with YOUR wallet address
   ]
 };
 
@@ -96,14 +96,19 @@ function isoWeek(d=new Date()){
 
 // deterministic pick: same 5 questions for EVERYONE in a given week
 function pickWeekly(bank, week, n=5){
-  const out=[]; const used=new Set();
-  let seed=week*2654435761 % 4294967296;
-  while(out.length<Math.min(n,bank.length)){
-    seed=(seed*1103515245+12345)%2147483648;
-    const i=seed%bank.length;
-    if(!used.has(i)){used.add(i);out.push(bank[i]);}
+  const idx=[...bank.keys()];
+  let s=(week*2654435761)>>>0;
+  function rnd(){
+    s=(s+0x6D2B79F5)>>>0;
+    let t=Math.imul(s^(s>>>15),1|s);
+    t=(t+Math.imul(t^(t>>>7),61|t))^t;
+    return ((t^(t>>>14))>>>0)/4294967296;
   }
-  return out;
+  for(let i=idx.length-1;i>0;i--){
+    const j=Math.floor(rnd()*(i+1));
+    [idx[i],idx[j]]=[idx[j],idx[i]];
+  }
+  return idx.slice(0,Math.min(n,bank.length)).map(i=>bank[i]);
 }
 
 function activeDrop(content, now=new Date()){
