@@ -41,7 +41,7 @@
   <!-- ============ NAME ============ -->
   <div id="scrName" class="hidden">
     <div class="panel">
-      <label>defendant's name</label>
+      <label>subject under audit</label>
       <input type="text" id="nm" maxlength="18" placeholder="state your name for the record" autocomplete="off" style="margin-bottom:16px">
       <button class="btn btn-primary" id="nameBtn" disabled>Open the case file →</button>
     </div>
@@ -109,13 +109,17 @@
           <div class="seal" id="seal"></div>
         </div>
 
-        <div class="doc-h">MOST EXPENSIVE CRIME</div>
+        <div class="doc-h">AUDITOR'S REMARKS</div>
+        <div class="ov" id="rOneLiner"></div>
+
+        <div class="doc-h">MOST EXPENSIVE HABIT</div>
         <div class="mostwanted">
           <div class="mw-item" id="mwItem"></div>
           <div class="mw-row"><span id="mwAmt"></span><span id="mwPct"></span></div>
         </div>
+        <div class="repeat-alert hidden" id="repeatAlert"></div>
 
-        <div class="doc-h">COURT FINDINGS</div>
+        <div class="doc-h">AUDIT FINDINGS</div>
         <div class="findings" id="rFindings"></div>
 
         <div class="doc-h">EVIDENCE HIGHLIGHTS</div>
@@ -130,18 +134,19 @@
     </div>
 
     <div style="width:100%;margin-top:18px;display:flex;flex-direction:column;gap:10px">
-      <button class="btn btn-share" id="shareBtn">CHALLENGE THE GC<small>send your damage score · make them face the audit</small></button>
+      <button class="btn btn-share" id="shareBtn">ISSUE AN AUDIT NOTICE<small>send your score · the department selects its next subject</small></button>
       <button class="btn btn-ghost" id="hdBtn">HD · no watermark<small>₹19 · UPI</small></button>
-      <button class="btn btn-quiet" id="freeBtn">download free (watermarked)</button>
-      <button class="btn btn-quiet" id="againBtn" style="opacity:.5">↻ retrial (the court remembers)</button>
+      <button class="btn btn-quiet" id="copyBtn">copy audit notice</button>
+      <button class="btn btn-quiet" id="freeBtn">download full report (watermarked)</button>
+      <button class="btn btn-quiet" id="againBtn" style="opacity:.5">↻ re-audit (the department remembers)</button>
     </div>
   </div>
 
   <!-- ============ DIARY ============ -->
   <div id="diary" style="margin-top:34px">
-    <label style="margin-bottom:10px">case history <span id="streak" style="color:var(--hilite)"></span></label>
+    <label style="margin-bottom:10px">audit history <span id="streak" style="color:var(--hilite)"></span></label>
     <div class="trend hidden" id="trendBox"></div>
-    <div id="diaryList"><div style="font-family:var(--font-doc);font-size:12px;opacity:.55;line-height:1.6">No prior offences on record. File your first audit — case history lives on this device only.</div></div>
+    <div id="diaryList"><div style="font-family:var(--font-doc);font-size:12px;opacity:.55;line-height:1.6">No prior audits on record. File your first one — audit history lives on this device only.</div></div>
     <button class="btn btn-quiet hidden" id="exportBtn" style="margin-top:6px">⬇ export case history (JSON)</button>
   </div>
 </div>
@@ -154,7 +159,7 @@
     <span class="sc-case" id="scCase"></span>
   </div>
   <div class="sc-body">
-    <div class="sc-label">DEFENDANT</div>
+    <div class="sc-label">SUBJECT</div>
     <div class="sc-name" id="scName"></div>
     <div class="sc-label" style="margin-top:26px">DAMAGE SCORE</div>
     <div class="sc-score"><span id="scScore"></span><small>/100</small></div>
@@ -167,7 +172,7 @@
     <div class="sc-verdict" id="scVerdict"></div>
   </div>
   <div class="sc-foot">
-    <div class="sc-cta">WHAT'S YOUR DAMAGE SCORE?</div>
+    <div class="sc-cta">CONSIDER THIS YOUR AUDIT NOTICE.</div>
     <div class="sc-url" id="scUrl"></div>
     <div class="bars sc-bars" id="scBars"></div>
   </div>
@@ -247,20 +252,31 @@ function runProcessing(){
 
 /* ---------- report ---------- */
 const CLASSES=[
-  [0,"SUSPICIOUSLY FUNCTIONAL ADULT"],
-  [20,"MINOR MENACE (FIRST OFFENCE)"],
-  [40,"SERIAL PROCRASTINATOR"],
-  [60,"PROFESSIONAL EXCUSE MANUFACTURER"],
-  [80,"CHIEF EXECUTIVE DELUSION OFFICER"],
-  [92,"PUBLIC THREAT TO GOALS"]
+  [0,"FUNCTIONING ADULT"],
+  [21,"SUSPICIOUSLY RESPONSIBLE"],
+  [41,"SERIAL PROCRASTINATOR"],
+  [61,"PROFESSIONAL EXCUSE MANUFACTURER"],
+  [81,"PUBLIC THREAT TO GOALS"],
+  [91,"CHIEF EXECUTIVE DELUSION OFFICER"]
+];
+const SEALS=[[0,"WITHIN LIMITS"],[20,"MINOR FLAGS"],[40,"OVER BUDGET"],[60,"HABITUAL"],[80,"SEVERE"],[92,"WRITE-OFF"]];
+const ONE_LINERS=[
+  "POTENTIAL DETECTED. EXECUTION MISSING.",
+  "DREAMS REMAIN AMBITIOUS. CALENDAR REMAINS EMPTY.",
+  "SUBJECT CLAIMS TO BE \"WORKING ON THEMSELVES\". INVESTIGATION ONGOING.",
+  "THE EVIDENCE IS CIRCUMSTANTIAL. THE PATTERN IS NOT.",
+  "REMARKABLE CONSISTENCY, ALL OF IT IN THE WRONG DIRECTION.",
+  "DISCIPLINE CALLED. THE CALL WENT TO VOICEMAIL.",
+  "PLANS: PREMIUM TIER. FOLLOW-THROUGH: FREE TRIAL.",
+  "THE DEPARTMENT HAS SEEN ENOUGH. THE DEPARTMENT WILL SEE IT AGAIN NEXT WEEK."
 ];
 const RISKS=[[0,"PAPERWORK ONLY"],[20,"LOW"],[40,"MODERATE MENACE"],[60,"HIGH"],[80,"SEVERE"]];
 const SENTENCES=[
-  "SENTENCE: TRY AGAIN NEXT WEEK.",
-  "SENTENCE: ONE WEEK OF PRETENDING TO DO BETTER.",
-  "SENTENCE: COMMUNITY SERVICE — REPLY TO YOUR PENDING TEXTS.",
-  "SENTENCE: SUPERVISED ADULTING UNTIL SUNDAY.",
-  "SENTENCE: RELEASED INTO THE CUSTODY OF THE GROUP CHAT."
+  "CORRECTIVE ACTION: TRY AGAIN NEXT WEEK.",
+  "CORRECTIVE ACTION: ONE WEEK OF PRETENDING TO DO BETTER.",
+  "CORRECTIVE ACTION: CLEAR YOUR PENDING TEXTS. ALL OF THEM.",
+  "CORRECTIVE ACTION: SUPERVISED ADULTING UNTIL SUNDAY.",
+  "CORRECTIVE ACTION: REFERRED TO THE GROUP CHAT FOR PEER REVIEW."
 ];
 function classify(score){let c=CLASSES[0][1];for(const[min,t]of CLASSES){if(score>=min)c=t;}return c;}
 function riskOf(score){let r=RISKS[0][1];for(const[min,t]of RISKS){if(score>=min)r=t;}return r;}
@@ -286,10 +302,18 @@ function buildReport(){
   const top=items.reduce((a,b)=>b.charge>a.charge?b:a,items[0]);
   const topPct=total>0?Math.round((top.charge/total)*100):0;
   const sentence=SENTENCES[(total+defendant.length)%SENTENCES.length];
-  const findings='THE DEFENDANT WAS OBSERVED COMMITTING "'+top.item+'" — IN THEIR OWN WORDS: "'+top.evidence+'". THE COURT NOTES THIS BEHAVIOUR APPEARS HABITUAL. '+verdict+" "+sentence;
+  const oneLiner=(CONTENT.one_liners&&CONTENT.one_liners.length?CONTENT.one_liners:ONE_LINERS)[(total*7+score)% (CONTENT.one_liners&&CONTENT.one_liners.length?CONTENT.one_liners.length:ONE_LINERS.length)];
+  const sealText=(()=>{let s=SEALS[0][1];for(const[min,t]of SEALS){if(score>=min)s=t;}return s;})();
+  const findings='THE SUBJECT WAS OBSERVED ENGAGING IN "'+top.item+'" — IN THEIR OWN WORDS: "'+top.evidence+'". THE AUDIT NOTES THIS BEHAVIOUR APPEARS HABITUAL. '+verdict+" "+sentence;
+
+  // repeat offender: how many consecutive past audits also contain the prime violation
+  let repeatRun=0;
+  for(const e of getDiary()){
+    if(e.items&&e.items.some(x=>x.item===top.item))repeatRun++;else break;
+  }
 
   let h="";for(const c of defendant)h=(h*31+c.charCodeAt(0))>>>0||c.charCodeAt(0);
-  const caseNo="CASE FILE #"+week+"-"+String(h%9000+1000);
+  const caseNo="AUDIT FILE #"+week+"-"+String(h%9000+1000);
   $("caseNo").textContent=caseNo;
   $("caseWk").textContent="WEEK "+week+" OF 52";
   $("rTitle").textContent=PACK_NAME;
@@ -301,7 +325,13 @@ function buildReport(){
   $("rTotal").textContent="₹"+total;
   $("scoreN").textContent=score;
   $("meterPin").style.left="calc("+score+"% - 2px)";
-  $("seal").textContent=score>=40?"GUILTY":"OUT ON BAIL";
+  $("seal").textContent=sealText;
+  $("rOneLiner").textContent='"'+oneLiner+'"';
+  const ra=$("repeatAlert");
+  if(repeatRun>=1){
+    ra.classList.remove("hidden");
+    ra.textContent="⚠ RECURRING CHARGE ALERT — THIS LINE ITEM HAS APPEARED IN "+(repeatRun+1)+" CONSECUTIVE AUDITS.";
+  }else{ra.classList.add("hidden");}
   $("mwItem").textContent='"'+top.item+'"';
   $("mwAmt").textContent="₹"+top.charge;
   $("mwPct").textContent=topPct+"% OF TOTAL DAMAGE";
@@ -314,7 +344,8 @@ function buildReport(){
   $("scClass").textContent=classification;
   $("scCrime").textContent='"'+top.item+'"';
   $("scCrimeAmt").textContent="₹"+top.charge+" · "+topPct+"% OF TOTAL DAMAGE";
-  $("scVerdict").textContent=sentence;
+  $("scVerdict").textContent='"'+oneLiner+'"';
+  window._notice={caseNo,score,classification,sealText};
   $("scUrl").textContent=CONFIG.domain;
   const sb=$("scBars");sb.innerHTML="";
   for(let i=0;i<46;i++){const b=document.createElement("i");b.style.height=(10+((total*i*7)%26))+"px";sb.append(b);}
@@ -349,20 +380,30 @@ async function renderPNG(el){
   return new Promise(res=>canvas.toBlob(res,"image/png"));
 }
 $("shareBtn").onclick=async()=>{
-  toast("Preparing the evidence…");
+  toast("Preparing the audit notice…");
   try{
     const blob=await renderPNG($("shareCard"));
     if(!blob)throw new Error("no canvas");
-    const file=new File([blob],"caught4k-score.png",{type:"image/png"});
-    const text="Damage score "+$("scoreN").textContent+"/100 — "+$("classStamp").textContent+". What's yours? "+CONFIG.domain;
+    const file=new File([blob],"caught4k-notice.png",{type:"image/png"});
+    const text=noticeText();
     if(navigator.canShare&&navigator.canShare({files:[file]})){
       await navigator.share({files:[file],text});
     }else{
-      downloadBlob(blob,"caught4k-score.png");toast("Share sheet unavailable here — score card downloaded instead. Post it!");
+      downloadBlob(blob,"caught4k-notice.png");toast("Share sheet unavailable here — notice downloaded instead. Deliver it manually!");
     }
   }catch(e){
     if(e.name!=="AbortError")toast("Couldn't render the image on this browser — screenshot works just as well.");
   }
+};
+function noticeText(){
+  const s=window._notice||{};
+  return "📋 YOU HAVE BEEN SELECTED FOR A PERSONAL AUDIT by the Department of Personal Accountability. "+(s.caseNo||"")+
+    ". My damage score: "+(s.score??"?")+"/100 — "+(s.classification||"")+
+    ". Non-compliance will be noted. "+CONFIG.domain;
+}
+$("copyBtn").onclick=async()=>{
+  try{await navigator.clipboard.writeText(noticeText());toast("Audit notice copied. Deliver it anywhere.");}
+  catch(e){toast("Couldn't access the clipboard — long-press the share button instead.");}
 };
 $("freeBtn").onclick=async()=>{
   toast("Printing the full report…");
@@ -413,8 +454,8 @@ function renderDiary(){
 $("exportBtn").onclick=()=>{
   const blob=new Blob([JSON.stringify(getDiary(),null,2)],{type:"application/json"});
   const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);a.download="caught4k-case-history.json";a.click();
-  toast("Exported. Keep it safe — case history lives only on this device.");
+  a.href=URL.createObjectURL(blob);a.download="caught4k-audit-history.json";a.click();
+  toast("Exported. Keep it safe — audit history lives only on this device.");
 };
 renderDiary();
 </script>
