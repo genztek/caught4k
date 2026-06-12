@@ -4,63 +4,136 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CAUGHT4K — your week, itemised</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Saira+Stencil+One&family=Special+Elite&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared/theme.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
 <div class="stage">
-  <div style="text-align:center;margin-bottom:14px">
-    <span class="chip" id="weekChip">LOADING…</span>
-  </div>
 
-  <!-- drop banner (shown only when a drop is live) -->
-  <div id="dropBanner" class="hidden" style="margin-bottom:14px;text-align:center">
-    <span class="chip chip-hot" id="dropName"></span>
-    <div style="margin-top:10px;display:flex;gap:8px">
-      <button class="btn btn-primary" id="useDrop" style="font-size:13.5px;padding:11px">Take the limited audit</button>
-      <button class="btn btn-ghost" id="useWeekly" style="font-size:13.5px;padding:11px">Regular weekly</button>
+  <!-- ============ START ============ -->
+  <div id="scrStart">
+    <div style="text-align:center;margin-bottom:14px">
+      <span class="chip" id="weekChip">OPENING CASE FILES…</span>
+    </div>
+    <div id="dropBanner" class="hidden" style="margin-bottom:14px;text-align:center">
+      <span class="chip chip-hot" id="dropName"></span>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button class="btn btn-primary" id="useDrop" style="font-size:13px;padding:11px">Take the limited audit</button>
+        <button class="btn btn-ghost" id="useWeekly" style="font-size:13px;padding:11px">Regular weekly</button>
+      </div>
+    </div>
+    <div class="panel" style="text-align:center;padding:30px 22px">
+      <div style="font-family:var(--font-display);font-size:30px;line-height:1.1">Your week.<br>Itemised.</div>
+      <div style="font-family:var(--font-doc);font-size:13px;opacity:.8;margin:14px 0 22px;line-height:1.6">
+        Answer 5 questions.<br>Receive your official damage report.
+      </div>
+      <button class="btn btn-primary" id="startBtn" disabled>START AUDIT</button>
+      <div style="font-family:var(--font-doc);font-size:10px;opacity:.5;margin-top:12px;letter-spacing:.08em">
+        NO LOGIN · NO MERCY · FINDINGS ARE FINAL
+      </div>
     </div>
   </div>
 
-  <!-- STEP 1 -->
-  <div class="panel" id="step1">
-    <label>name on the report</label>
-    <input type="text" id="nm" maxlength="18" placeholder="your name" autocomplete="off" style="margin-bottom:18px">
-    <div id="qHost"></div>
-    <button class="btn btn-primary" id="goBtn" disabled>file this week's report →</button>
+  <!-- ============ NAME ============ -->
+  <div id="scrName" class="hidden">
+    <div class="panel">
+      <label>defendant's name</label>
+      <input type="text" id="nm" maxlength="18" placeholder="state your name for the record" autocomplete="off" style="margin-bottom:16px">
+      <button class="btn btn-primary" id="nameBtn" disabled>Open the case file →</button>
+    </div>
   </div>
 
-  <!-- STEP 2 -->
-  <div id="step2" class="hidden" style="display:flex;flex-direction:column;align-items:center">
-    <div class="receipt" id="rcpt">
-      <div class="rHead">
-        <div class="big" id="rTitle">WEEKLY DAMAGE REPORT</div>
-        <div class="sm" id="rSub"></div>
+  <!-- ============ QUIZ (one question per screen) ============ -->
+  <div id="scrQuiz" class="hidden">
+    <div class="prog-label" id="progLabel"></div>
+    <div class="prog"><i id="progBar" style="width:0%"></i></div>
+    <div class="panel">
+      <div class="q" style="margin-bottom:0">
+        <label id="qLabel"></label>
+        <div class="opts" id="qOpts"></div>
       </div>
-      <div id="rItems"></div>
-      <div class="sep"></div>
-      <div class="total"><span>TOTAL DAMAGE</span><span id="rTotal"></span></div>
-      <div class="verdict" id="rVerdict"></div>
-      <div class="ribbon" id="nextWeek"></div>
-      <div class="barcode"><div class="bars" id="rBars"></div></div>
-      <div class="rFoot">FINDINGS ARE FINAL · APPEALS REJECTED</div>
+    </div>
+    <button class="btn btn-quiet" id="backBtn" style="margin-top:10px">← previous question</button>
+  </div>
+
+  <!-- ============ PROCESSING ============ -->
+  <div id="scrProc" class="hidden">
+    <div class="panel proc" style="padding:30px 24px">
+      <h3>AUDIT IN PROGRESS</h3>
+      <div class="ln" data-i="0">Collecting evidence…</div>
+      <div class="ln" data-i="1"><b>✓</b> Sleep records seized</div>
+      <div class="ln" data-i="2"><b>✓</b> Food violations photographed</div>
+      <div class="ln" data-i="3"><b>✓</b> Productivity crimes documented</div>
+      <div class="ln" data-i="4"><b>✓</b> Financial mistakes recovered from trash</div>
+      <div class="ln" data-i="5">Consulting authorities…</div>
+      <div class="ln" data-i="6"><b>✓</b> The authorities laughed</div>
+    </div>
+  </div>
+
+  <!-- ============ REPORT ============ -->
+  <div id="scrReport" class="hidden">
+    <div class="doc" id="docCard">
+      <div class="doc-band">
+        <div class="dept">Department of Personal Accountability and Life Audits</div>
+        <div class="brandmark">CAUGHT<em>4K</em><span class="sub">YOUR WEEK. ITEMISED.</span></div>
+        <div class="case"><b id="caseNo"></b><span id="caseWk" class="wk"></span></div>
+      </div>
+
+      <div class="doc-body">
+        <div class="doc-title" id="rTitle">WEEKLY DAMAGE REPORT</div>
+        <div class="doc-meta">
+          <span>SUBJECT: <b id="mSubject"></b></span>
+          <span>AUDIT PERIOD: <span id="mPeriod"></span></span>
+          <span>FILED: <span id="mFiled"></span></span>
+        </div>
+
+        <div class="doc-h">ITEMISED CHARGES</div>
+        <table class="charges"><tbody id="chargeRows"></tbody></table>
+        <div class="tot"><span>TOTAL DAMAGE</span><b id="rTotal"></b></div>
+
+        <div class="doc-h">DAMAGE SCORE</div>
+        <div class="scoreblock">
+          <div class="score-num"><span id="scoreN"></span><small> /100</small></div>
+          <div class="meter"><i id="meterPin"></i></div>
+          <div class="meter-cap"><span>0 · SAINT</span><span>100 · MENACE</span></div>
+          <div style="margin-top:13px">
+            <div style="font-family:var(--font-doc);font-size:9.5px;letter-spacing:.14em;color:var(--ink-soft)">CLASSIFICATION</div>
+            <div class="stamp" id="classStamp" style="margin-top:6px"></div>
+          </div>
+          <div class="verdict-line" id="rVerdict"></div>
+          <div class="seal" id="seal"></div>
+        </div>
+
+        <div class="doc-h">EVIDENCE HIGHLIGHTS</div>
+        <div class="tiles" id="tiles"></div>
+        <div class="fineprint">EVIDENCE IS INVENTED. THE GUILT IS REAL.</div>
+
+        <div class="ribbon" id="nextWeek"></div>
+        <div class="barcode"><div class="bars" id="rBars"></div></div>
+      </div>
+
+      <div class="doc-foot">FINDINGS ARE FINAL ★ APPEALS REJECTED ★ SEE YOU NEXT WEEK</div>
       <div class="wm"><span id="wmText"></span></div>
     </div>
 
-    <div style="width:100%;max-width:340px;margin-top:20px;display:flex;flex-direction:column;gap:10px">
-      <button class="btn btn-share" id="shareBtn">Send it to the gc<small>compare damage totals</small></button>
+    <div style="width:100%;margin-top:18px;display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-share" id="shareBtn">CHALLENGE THE GC<small>send your damage score · make them face the audit</small></button>
       <button class="btn btn-ghost" id="hdBtn">HD · no watermark<small>₹19 · UPI</small></button>
       <button class="btn btn-quiet" id="freeBtn">download free (watermarked)</button>
-      <button class="btn btn-quiet" id="againBtn" style="opacity:.5">↻ redo (the receipt will know you lied)</button>
+      <button class="btn btn-quiet" id="againBtn" style="opacity:.5">↻ retrial (the court remembers)</button>
     </div>
   </div>
 
-  <!-- DIARY -->
+  <!-- ============ DIARY ============ -->
   <div id="diary" style="margin-top:34px">
-    <label style="margin-bottom:10px">my receipts <span id="streak" style="color:var(--accent)"></span></label>
+    <label style="margin-bottom:10px">case history <span id="streak" style="color:var(--hilite)"></span></label>
     <div class="trend hidden" id="trendBox"></div>
-    <div id="diaryList"><div style="font-size:13px;opacity:.55">No receipts yet. File your first audit above — the diary lives on this device only.</div></div>
-    <button class="btn btn-quiet hidden" id="exportBtn" style="margin-top:6px">⬇ export my receipts (JSON)</button>
+    <div id="diaryList"><div style="font-family:var(--font-doc);font-size:12px;opacity:.55;line-height:1.6">No prior offences on record. File your first audit — case history lives on this device only.</div></div>
+    <button class="btn btn-quiet hidden" id="exportBtn" style="margin-top:6px">⬇ export case history (JSON)</button>
   </div>
 </div>
 
@@ -68,148 +141,213 @@
 <script>
 injectChrome();
 
-let CONTENT=null, PACK=null, PACK_NAME="WEEKLY DAMAGE REPORT", picks=[], drop=null;
+let CONTENT=null, PACK=null, PACK_NAME="WEEKLY DAMAGE REPORT", picks=[], qi=0, drop=null, defendant="";
 const week=isoWeek();
+
+const $=id=>document.getElementById(id);
+const screens=["scrStart","scrName","scrQuiz","scrProc","scrReport"];
+function show(id){screens.forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo({top:0,behavior:"smooth"});}
 
 (async function init(){
   CONTENT=await loadContent();
-  document.getElementById("weekChip").textContent="WEEK "+week+" OF 52 · AUDIT OPEN";
-  document.getElementById("wmText").textContent=CONFIG.domain;
-
+  $("weekChip").textContent="WEEK "+week+" OF 52 · AUDIT OPEN";
+  $("wmText").textContent=CONFIG.domain;
   drop=activeDrop(CONTENT);
   if(drop){
-    document.getElementById("dropBanner").classList.remove("hidden");
-    document.getElementById("dropName").textContent=(drop.badge||"🔥 LIMITED")+" — "+drop.name;
+    $("dropBanner").classList.remove("hidden");
+    $("dropName").textContent=(drop.badge||"🔥 LIMITED")+" — "+drop.name;
   }
-  useWeeklyPack();
+  setWeeklyPack();
+  $("startBtn").disabled=false;
 })();
 
-function useWeeklyPack(){
+function setWeeklyPack(){
   const seasonal=seasonalPack(CONTENT,week);
   if(seasonal){PACK=seasonal.questions;PACK_NAME=seasonal.name;}
   else{PACK=pickWeekly(CONTENT.weekly_bank,week,5);PACK_NAME="WEEKLY DAMAGE REPORT";}
-  renderQuestions();
 }
-document.getElementById("useWeekly").onclick=useWeeklyPack;
-document.getElementById("useDrop").onclick=()=>{
-  PACK=drop.questions;PACK_NAME=drop.name;renderQuestions();
-  toast("Limited audit loaded. It expires — file it before it's gone.");
+$("useWeekly").onclick=()=>{setWeeklyPack();toast("Regular weekly audit selected.");};
+$("useDrop").onclick=()=>{PACK=drop.questions;PACK_NAME=drop.name;toast("Limited audit loaded. It expires — file it before it's gone.");};
+
+/* ---------- flow ---------- */
+$("startBtn").onclick=()=>{show("scrName");setTimeout(()=>$("nm").focus(),100);};
+$("nm").addEventListener("input",e=>$("nameBtn").disabled=e.target.value.trim().length<2);
+$("nameBtn").onclick=()=>{
+  defendant=$("nm").value.trim().toUpperCase();
+  picks=new Array(PACK.length).fill(null);qi=0;
+  renderQ();show("scrQuiz");
 };
 
-function renderQuestions(){
-  picks=new Array(PACK.length).fill(null);
-  const host=document.getElementById("qHost");host.innerHTML="";
-  PACK.forEach((q,qi)=>{
-    const div=document.createElement("div");div.className="q";
-    div.innerHTML="<label>"+q.label+"</label>";
-    const opts=document.createElement("div");opts.className="opts";
-    q.options.forEach((o,oi)=>{
-      const b=document.createElement("button");b.className="opt";b.textContent=o.text;
-      b.onclick=()=>{
-        opts.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel"));
-        b.classList.add("sel");picks[qi]=oi;checkReady();
-      };
-      opts.append(b);
-    });
-    div.append(opts);host.append(div);
+function renderQ(){
+  const q=PACK[qi];
+  $("progLabel").textContent="QUESTION "+(qi+1)+" OF "+PACK.length;
+  $("progBar").style.width=Math.round((qi/PACK.length)*100)+"%";
+  $("qLabel").textContent=q.label;
+  const host=$("qOpts");host.innerHTML="";
+  q.options.forEach((o,oi)=>{
+    const b=document.createElement("button");b.className="opt"+(picks[qi]===oi?" sel":"");
+    b.textContent=o.text;
+    b.onclick=()=>{
+      picks[qi]=oi;
+      host.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel"));
+      b.classList.add("sel");
+      setTimeout(()=>{ qi+1<PACK.length ? (qi++,renderQ()) : runProcessing(); },230);
+    };
+    host.append(b);
   });
-  checkReady();
+  $("backBtn").style.visibility=qi===0?"hidden":"visible";
+}
+$("backBtn").onclick=()=>{if(qi>0){qi--;renderQ();}};
+
+function runProcessing(){
+  show("scrProc");
+  const lines=document.querySelectorAll("#scrProc .ln");
+  lines.forEach(l=>l.classList.remove("on"));
+  const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduced){lines.forEach(l=>l.classList.add("on"));setTimeout(buildReport,500);return;}
+  lines.forEach((l,i)=>setTimeout(()=>l.classList.add("on"),320*i+200));
+  setTimeout(buildReport,320*lines.length+700);
 }
 
-const nm=document.getElementById("nm");
-nm.addEventListener("input",checkReady);
-function checkReady(){
-  document.getElementById("goBtn").disabled=!(nm.value.trim().length>1&&picks.every(p=>p!==null));
-}
+/* ---------- report ---------- */
+const CLASSES=[
+  [0,"SUSPICIOUSLY FUNCTIONAL ADULT"],
+  [20,"MINOR MENACE (FIRST OFFENCE)"],
+  [40,"REPEAT OFFENDER, ZERO REMORSE"],
+  [60,"PROFESSIONAL EXCUSE MANUFACTURER"],
+  [80,"PUBLIC THREAT TO GOALS"]
+];
+function classify(score){let c=CLASSES[0][1];for(const[min,t]of CLASSES){if(score>=min)c=t;}return c;}
 
-document.getElementById("goBtn").onclick=()=>{
-  const name=nm.value.trim().toUpperCase();
+function buildReport(){
   const now=new Date(), from=new Date(now);from.setDate(now.getDate()-6);
   const fmt=d=>d.toLocaleDateString("en-IN",{day:"numeric",month:"short"});
 
-  document.getElementById("rTitle").textContent=PACK_NAME;
-  document.getElementById("rSub").textContent="SUBJECT: "+name+" · "+fmt(from)+" – "+fmt(now);
-
-  let html="",total=0,items=[];
-  PACK.forEach((q,qi)=>{
-    const o=q.options[picks[qi]];total+=o.charge;
-    items.push({item:o.item,charge:o.charge});
-    html+='<div class="row"><span>'+o.item+'</span><span class="r">₹'+o.charge+"</span></div>";
+  let total=0,maxTotal=0,items=[],rows="";
+  PACK.forEach((q,i)=>{
+    const o=q.options[picks[i]];
+    total+=o.charge;
+    maxTotal+=Math.max(...q.options.map(x=>x.charge));
+    items.push({item:o.item,charge:o.charge,evidence:o.text});
+    rows+='<tr><td><div class="vio">'+o.item+'</div><div class="ev">"'+o.text+'"</div></td><td class="amt">₹'+o.charge+"</td></tr>";
   });
-  const rec=name.length*8;total+=rec;
-  html+='<div class="row"><span>"Starting Monday" fee (recurring)</span><span class="r">₹'+rec+"/wk</span></div>";
+  const rec=defendant.length*8;total+=rec;maxTotal+=18*8;
+  rows+='<tr><td><div class="vio">"Starting Monday" fee (recurring)</div><div class="ev">said weekly. meant never.</div></td><td class="amt">₹'+rec+"/wk</td></tr>";
 
-  document.getElementById("rItems").innerHTML=html;
-  document.getElementById("rTotal").textContent="₹"+total;
+  const score=Math.min(100,Math.round((total/maxTotal)*100));
+  const classification=classify(score);
   const verdict=CONTENT.verdicts[total%CONTENT.verdicts.length];
-  document.getElementById("rVerdict").textContent=verdict;
+
+  let h="";for(const c of defendant)h=(h*31+c.charCodeAt(0))>>>0||c.charCodeAt(0);
+  $("caseNo").textContent="CASE FILE #"+week+"-"+String(h%9000+1000);
+  $("caseWk").textContent="WEEK "+week+" OF 52";
+  $("rTitle").textContent=PACK_NAME;
+  $("mSubject").textContent=defendant;
+  $("mPeriod").textContent=fmt(from)+" – "+fmt(now);
+  $("mFiled").textContent=fmt(now)+" "+now.getFullYear();
+  $("chargeRows").innerHTML=rows;
+  $("rTotal").textContent="₹"+total;
+  $("scoreN").textContent=score;
+  $("meterPin").style.left="calc("+score+"% - 2px)";
+  $("rVerdict").textContent=verdict;
+  $("seal").textContent=score>=40?"GUILTY":"OUT ON BAIL";
+
+  const tiles=[
+    [Math.round(total*0.6)+"m","scroll depth · your thumb has a commute"],
+    ["7 / 0","\"starting monday\" — said / done"],
+    ["1:"+String(10+score%50).padStart(2,"0")+" AM","average bedtime · allegedly \"early\""]
+  ];
+  $("tiles").innerHTML=tiles.map(t=>'<div class="tile"><div class="k">'+t[0]+'</div><div class="t">'+t[1]+"</div></div>").join("");
 
   const daysToSun=(7-now.getDay())%7||7;
   const ns=new Date(now);ns.setDate(now.getDate()+daysToSun);
-  document.getElementById("nextWeek").textContent="AUDIT REOPENS: SUNDAY "+
-    ns.toLocaleDateString("en-IN",{day:"numeric",month:"short"}).toUpperCase();
+  $("nextWeek").textContent="NEXT AUDIT: SUNDAY "+fmt(ns).toUpperCase()+" · SET A REMINDER TO FACE THE TRUTH";
 
-  const bars=document.getElementById("rBars");bars.innerHTML="";
-  for(let i=0;i<34;i++){const b=document.createElement("i");b.style.height=(9+((total*i*7)%23))+"px";bars.append(b);}
+  const bars=$("rBars");bars.innerHTML="";
+  for(let i=0;i<40;i++){const b=document.createElement("i");b.style.height=(8+((total*i*7)%22))+"px";bars.append(b);}
 
-  saveToDiary({week,date:now.toISOString(),pack:PACK_NAME,total,verdict,items,name});
+  saveToDiary({week,date:now.toISOString(),pack:PACK_NAME,total,score,classification,verdict,items,name:defendant});
 
-  document.getElementById("step1").classList.add("hidden");
-  document.getElementById("step2").classList.remove("hidden");
-  window.scrollTo({top:0,behavior:"smooth"});
+  show("scrReport");
+  const st=$("classStamp");st.classList.remove("slam");st.textContent=classification;
+  void st.offsetWidth; st.classList.add("slam");
+}
+
+$("againBtn").onclick=()=>{picks=new Array(PACK.length).fill(null);qi=0;renderQ();show("scrQuiz");};
+
+/* ---------- PNG export + share ---------- */
+async function renderPNG(){
+  if(typeof html2canvas==="undefined")return null;
+  const canvas=await html2canvas($("docCard"),{scale:2,backgroundColor:null,useCORS:true});
+  return new Promise(res=>canvas.toBlob(res,"image/png"));
+}
+$("shareBtn").onclick=async()=>{
+  toast("Preparing the evidence…");
+  try{
+    const blob=await renderPNG();
+    if(!blob)throw new Error("no canvas");
+    const file=new File([blob],"caught4k-report.png",{type:"image/png"});
+    const text="Damage score "+$("scoreN").textContent+"/100 — "+$("classStamp").textContent+". What's yours? "+CONFIG.domain;
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],text});
+    }else{
+      downloadBlob(blob);toast("Share sheet unavailable here — report downloaded instead. Post it!");
+    }
+  }catch(e){
+    if(e.name!=="AbortError")toast("Couldn't render the image on this browser — screenshot works just as well.");
+  }
 };
-
-document.getElementById("againBtn").onclick=()=>{
-  document.getElementById("step2").classList.add("hidden");
-  document.getElementById("step1").classList.remove("hidden");
+$("freeBtn").onclick=async()=>{
+  toast("Printing the report…");
+  try{const blob=await renderPNG();if(!blob)throw 0;downloadBlob(blob);}
+  catch(e){toast("Couldn't render on this browser — a screenshot works just as well.");}
 };
-document.getElementById("shareBtn").onclick=()=>toast("Live version: native share sheet opens with the card attached (WhatsApp / Instagram).");
-document.getElementById("hdBtn").onclick=()=>toast("Live version: Razorpay link → ₹19 UPI → clean HD card downloads.");
-document.getElementById("freeBtn").onclick=()=>toast("Live version: saves the watermarked PNG, generated in the browser.");
+function downloadBlob(blob){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download="caught4k-report.png";a.click();
+}
+$("hdBtn").onclick=()=>toast("HD unlock coming soon — ₹19 via UPI. For now the watermark stays. The guilt is free.");
 
-/* ---------- diary (device-local only) ---------- */
+/* ---------- diary ---------- */
 const DKEY="c4k_diary";
 function getDiary(){try{return JSON.parse(localStorage.getItem(DKEY)||"[]");}catch(e){return [];}}
 function saveToDiary(entry){
   try{
-    const d=getDiary();
-    d.unshift(entry);
+    const d=getDiary();d.unshift(entry);
     localStorage.setItem(DKEY,JSON.stringify(d.slice(0,200)));
     renderDiary();
-  }catch(e){/* storage unavailable (private mode etc.) — app still works */}
+  }catch(e){/* storage unavailable — app still works */}
 }
 function renderDiary(){
   const d=getDiary();
-  const list=document.getElementById("diaryList");
-  const exportBtn=document.getElementById("exportBtn");
   if(!d.length)return;
-  exportBtn.classList.remove("hidden");
+  $("exportBtn").classList.remove("hidden");
 
-  // streak: consecutive distinct weeks
   const weeks=[...new Set(d.map(e=>e.week))].sort((a,b)=>b-a);
   let streak=1;
   for(let i=0;i<weeks.length-1;i++){if(weeks[i]-weeks[i+1]===1)streak++;else break;}
-  document.getElementById("streak").textContent=weeks.length>1?("· "+streak+"-week streak"):"";
+  $("streak").textContent=weeks.length>1?("· "+streak+"-week streak"):"";
 
-  // trend roast: compare two most recent different entries
   if(d.length>=2){
-    const diff=d[0].total-d[1].total;
-    const tb=document.getElementById("trendBox");tb.classList.remove("hidden");
+    const cur=d[0].score??Math.min(100,Math.round(d[0].total/30));
+    const prev=d[1].score??Math.min(100,Math.round(d[1].total/30));
+    const diff=cur-prev;
+    const tb=$("trendBox");tb.classList.remove("hidden");
     tb.textContent=diff>0
-      ? "📈 Damage up ₹"+diff+" from last audit. The receipt is disappointed but not surprised."
+      ? "📈 Damage score up "+diff+" points since the last audit. The department is disappointed but not surprised."
       : diff<0
-      ? "📉 Damage down ₹"+(-diff)+". Who is she. Don't let it go to your head."
-      : "↔ Exactly the same damage. Consistency is a personality, apparently.";
+      ? "📉 Down "+(-diff)+" points. Reform detected. Don't let it go to your head."
+      : "↔ Identical score. Consistency is a personality, apparently.";
   }
-  list.innerHTML=d.slice(0,12).map(e=>
+  $("diaryList").innerHTML=d.slice(0,12).map(e=>
     '<div class="diaryItem"><span>WK '+e.week+" · "+new Date(e.date).toLocaleDateString("en-IN",{day:"numeric",month:"short"})+
-    '</span><span><b>₹'+e.total+"</b></span></div>").join("");
+    '</span><span><b>'+(e.score!=null?e.score+"/100":"₹"+e.total)+"</b></span></div>").join("");
 }
-document.getElementById("exportBtn").onclick=()=>{
+$("exportBtn").onclick=()=>{
   const blob=new Blob([JSON.stringify(getDiary(),null,2)],{type:"application/json"});
   const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);a.download="caught4k-receipts.json";a.click();
-  toast("Exported. Keep it safe — the diary lives only on this device.");
+  a.href=URL.createObjectURL(blob);a.download="caught4k-case-history.json";a.click();
+  toast("Exported. Keep it safe — case history lives only on this device.");
 };
 renderDiary();
 </script>
