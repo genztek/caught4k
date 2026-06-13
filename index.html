@@ -346,6 +346,8 @@ function buildReport(){
   $("scCrimeAmt").textContent="₹"+top.charge+" · "+topPct+"% OF TOTAL DAMAGE";
   $("scVerdict").textContent='"'+oneLiner+'"';
   window._notice={caseNo,score,classification,sealText};
+  window._card={caseNo,name:defendant,score,classification,sealText,
+    crime:top.item,crimeAmt:"₹"+top.charge+" · "+topPct+"% OF TOTAL DAMAGE",oneLiner};
   $("scUrl").textContent=CONFIG.domain;
   const sb=$("scBars");sb.innerHTML="";
   for(let i=0;i<46;i++){const b=document.createElement("i");b.style.height=(10+((total*i*7)%26))+"px";sb.append(b);}
@@ -374,25 +376,114 @@ function buildReport(){
 $("againBtn").onclick=()=>{picks=new Array(PACK.length).fill(null);qi=0;renderQ();show("scrQuiz");};
 
 /* ---------- PNG export + share ---------- */
-async function renderPNG(el){
-  if(typeof html2canvas==="undefined")return null;
-  const canvas=await html2canvas(el,{scale:2,backgroundColor:"#0C0B09",useCORS:true});
-  return new Promise(res=>canvas.toBlob(res,"image/png"));
+// Native canvas render of the 1080x1920 story card — no library, works on iOS.
+function wrapText(ctx,text,maxW){
+  const words=text.split(" ");let lines=[],line="";
+  for(const w of words){
+    const t=line?line+" "+w:w;
+    if(ctx.measureText(t).width>maxW&&line){lines.push(line);line=w;}else line=t;
+  }
+  if(line)lines.push(line);return lines;
 }
+async function renderCardBlob(){
+  const d=window._card;if(!d)return null;
+  const W=1080,H=1920,cx=W/2;
+  const cv=document.createElement("canvas");cv.width=W;cv.height=H;
+  const ctx=cv.getContext("2d");
+  // background
+  const g=ctx.createRadialGradient(cx,0,80,cx,H*0.55,H);
+  g.addColorStop(0,"#211E17");g.addColorStop(1,"#0C0B09");
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // subtle border frame
+  ctx.strokeStyle="rgba(215,53,42,.5)";ctx.lineWidth=4;ctx.strokeRect(40,40,W-80,H-80);
+
+  const RED="#D7352A",PAPER="#F2EDE3",HIL="#F2C53D";
+  const mono='"Courier New",monospace';
+  const center=(t,y,font,color,ls)=>{
+    ctx.font=font;ctx.fillStyle=color;ctx.textAlign="center";
+    if(ls){ // letter spacing
+      const total=t.split("").reduce((a,c)=>a+ctx.measureText(c).width+ls,0)-ls;
+      let x=cx-total/2;ctx.textAlign="left";
+      for(const c of t){ctx.fillText(c,x,y);x+=ctx.measureText(c).width+ls;}
+      ctx.textAlign="center";
+    }else ctx.fillText(t,cx,y);
+  };
+
+  // dept tag
+  ctx.save();ctx.translate(cx,150);ctx.rotate(-0.03);
+  ctx.strokeStyle=RED;ctx.lineWidth=3;
+  ctx.font="bold 26px "+mono;const dt="DEPT. OF PERSONAL ACCOUNTABILITY";
+  const dw=ctx.measureText(dt).width;ctx.strokeRect(-dw/2-22,-34,dw+44,56);
+  ctx.fillStyle=RED;ctx.textAlign="center";ctx.fillText(dt,0,4);ctx.restore();
+
+  center("CAUGHT4K",270,"900 84px Arial","#F2EDE3",2);
+  ctx.fillStyle=RED;ctx.font="900 84px Arial";  // overlay the 4K in red
+  const bw=ctx.measureText("CAUGHT4K").width;
+  ctx.textAlign="left";ctx.fillText("4K",cx+bw/2-ctx.measureText("4K").width,270);ctx.textAlign="center";
+
+  center(d.caseNo,340,"30px "+mono,"rgba(242,237,227,.7)",2);
+
+  center("DAMAGE SCORE",470,"30px "+mono,"rgba(242,237,227,.75)",8);
+  // giant score
+  ctx.textAlign="center";ctx.fillStyle=RED;ctx.font="900 420px Arial";
+  ctx.fillText(d.score,cx-40,790);
+  ctx.fillStyle=PAPER;ctx.font="bold 90px "+mono;ctx.textAlign="left";
+  ctx.fillText("/100",cx+ (""+d.score).length*0 +120,770);
+  ctx.textAlign="center";
+
+  // classification stamp
+  ctx.save();ctx.translate(cx,910);ctx.rotate(-0.04);
+  ctx.strokeStyle=RED;ctx.lineWidth=6;ctx.font="bold 46px "+mono;
+  const cl=d.classification;let clw=ctx.measureText(cl).width;
+  if(clw>W-200){ctx.font="bold 36px "+mono;clw=ctx.measureText(cl).width;}
+  ctx.strokeRect(-clw/2-30,-46,clw+60,78);
+  ctx.fillStyle=RED;ctx.fillText(cl,0,0);ctx.restore();
+
+  // one-liner verdict
+  ctx.font="bold 42px "+mono;
+  const ol=wrapText(ctx,'"'+d.oneLiner+'"',W-220);
+  let y=1080;for(const ln of ol){center(ln,y,"bold 42px "+mono,PAPER);y+=58;}
+
+  // most expensive habit box
+  y+=20;
+  ctx.strokeStyle=PAPER;ctx.lineWidth=3;ctx.strokeRect(110,y,W-220,180);
+  center("MOST EXPENSIVE HABIT",y+50,"26px "+mono,"rgba(242,237,227,.6)",4);
+  center(d.crime.length>34?d.crime.slice(0,32)+"…":d.crime,y+100,"bold 38px "+mono,PAPER);
+  center(d.crimeAmt,y+150,"30px "+mono,HIL);
+
+  // footer CTA
+  center("WHAT'S YOUR DAMAGE SCORE?",H-220,"30px "+mono,"rgba(242,237,227,.8)",3);
+  center("CONSIDER THIS YOUR AUDIT NOTICE.",H-165,"bold 40px "+mono,HIL,1);
+  center(CONFIG.domain.toUpperCase(),H-95,"30px "+mono,RED,4);
+
+  return new Promise(res=>cv.toBlob(res,"image/png"));
+}
+
+// Full document still uses html2canvas (optional, desktop-friendly); degrades gracefully.
+async function renderDocBlob(){
+  if(typeof html2canvas==="undefined")return null;
+  try{const canvas=await html2canvas($("docCard"),{scale:2,backgroundColor:"#0C0B09",useCORS:true});
+    return new Promise(res=>canvas.toBlob(res,"image/png"));}catch(e){return null;}
+}
+
 $("shareBtn").onclick=async()=>{
   toast("Preparing the audit notice…");
   try{
-    const blob=await renderPNG($("shareCard"));
-    if(!blob)throw new Error("no canvas");
+    const blob=await renderCardBlob();
+    if(!blob)throw new Error("no card");
     const file=new File([blob],"caught4k-notice.png",{type:"image/png"});
     const text=noticeText();
     if(navigator.canShare&&navigator.canShare({files:[file]})){
       await navigator.share({files:[file],text});
     }else{
-      downloadBlob(blob,"caught4k-notice.png");toast("Share sheet unavailable here — notice downloaded instead. Deliver it manually!");
+      downloadBlob(blob,"caught4k-notice.png");
+      toast("Saved to your photos/downloads — post it to your story!");
     }
   }catch(e){
-    if(e.name!=="AbortError")toast("Couldn't render the image on this browser — screenshot works just as well.");
+    if(e.name!=="AbortError"){
+      try{const b=await renderCardBlob();if(b)downloadBlob(b,"caught4k-notice.png");toast("Saved the notice — post it to your story!");}
+      catch(_){toast("Couldn't generate the image here — a screenshot works too.");}
+    }
   }
 };
 function noticeText(){
@@ -406,9 +497,11 @@ $("copyBtn").onclick=async()=>{
   catch(e){toast("Couldn't access the clipboard — long-press the share button instead.");}
 };
 $("freeBtn").onclick=async()=>{
-  toast("Printing the full report…");
-  try{const blob=await renderPNG($("docCard"));if(!blob)throw 0;downloadBlob(blob,"caught4k-report.png");}
-  catch(e){toast("Couldn't render on this browser — a screenshot works just as well.");}
+  toast("Generating your audit notice…");
+  // The shareable card is the reliable image on all phones; offer it as the download too.
+  try{const blob=await renderCardBlob();if(!blob)throw 0;downloadBlob(blob,"caught4k-notice.png");
+    toast("Saved. Post it, or tap ISSUE AN AUDIT NOTICE to share directly.");}
+  catch(e){toast("Couldn't generate on this browser — a screenshot works just as well.");}
 };
 function downloadBlob(blob,name){
   const a=document.createElement("a");
